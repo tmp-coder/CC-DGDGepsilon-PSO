@@ -1,7 +1,11 @@
 function vec=rotate(x)
-% vec = X*M
-%  M is a orthogonal matrix
-D = size(x,1);
-M = rand(D,D);
-M = orth(M);
-vec = x*M;
+% vec = X*rot_matrix
+%  rot_mat is a orthogonal matrix
+
+persistent rot_mat; % Prevent the value of rot matrix in the iteration processing changes.
+if isempty(rot_mat)
+    D = size(x,1);
+    M = rand(D,D);
+    rot_mat = orth(M);
+end
+vec = x'*rot_mat;
