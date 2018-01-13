@@ -8,4 +8,4 @@ if isempty(rot_mat)
     M = rand(D,D);
     rot_mat = orth(M);
 end
-vec = x'*rot_mat;
+vec = (x'*rot_mat)';
