@@ -16,7 +16,7 @@ FEs = 0;
 % calculate diff matrix %
 
 x=LB;
-F1 = feval(fname,p1);
+F1 = feval(fname,x);
 FEs = FEs+1;
 F2_vec = zeros(1,D);
 F3_vec = zeros(1,D);
@@ -26,11 +26,11 @@ for i=1:D
     x(i) = 0;
     F3_vec(i) = feval(fname,x);
     x(i) = LB(i);% recover the raw value
-    FEs = FEs+2
+    FEs = FEs+2;
 end
 
 for i = 1: D-1
-    delta1 = F1 - F2(i);
+    delta1 = F1 - F2_vec(i);
     x(i) = UB(i);
     for j = i+1:D
         x(j) = 0;
