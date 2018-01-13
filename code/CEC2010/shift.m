@@ -4,7 +4,7 @@ function vec = shift(x)
 persistent o; % shifted center,Prevent the value of rot matrix in the iteration processing changes.
 
 if isempty(o)
-    D = size(x,1);
-    o = normrnd(0,1,D,1);
+    sz = size(x);
+    o = normrnd(0,1,sz);
 end
 vec = x - o;
