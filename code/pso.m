@@ -14,7 +14,7 @@ function [GBest,cache_fit,FEs] = pso(groups,max_FEs,costf,LB,UB)
 
 %% PSO Parameters
 ng = size(groups,1);
-nPop = 25; % number of paticles
+nPop = 32; % number of paticles
 maxIter = ceil(max_FEs/nPop/ng);
 
 w=1;            % Inertia Weight
@@ -36,8 +36,8 @@ c2=2.0;         % Global Learning Coefficient
 % c2=chi*phi2;    % Global Learning Coefficient
  
 % Velocity Limits
-VLB=0.1*(UB-LB);
-VUB=-VLB;
+VUB=0.1*(UB-LB);
+VLB=-VUB;
 
 %% initialization
 
@@ -71,8 +71,8 @@ for i=1:ng
     group(i).varsz = [sum(group(i).var),1];
     group(i).varlb = LB(group(i).var);
     group(i).varub = UB(group(i).var);
-    group(i).vlb = LB(group(i).var);
-    group(i).vub = UB(group(i).var);
+    group(i).vlb = VLB(group(i).var);
+    group(i).vub = VUB(group(i).var);
 end
 
 for i=1:nPop
@@ -80,7 +80,7 @@ for i=1:nPop
     cost = feval(costf,tmppos);
     FEs= FEs+1;
     if cost < GBest.cost
-        GBest.cost = cost
+        GBest.cost = cost;
         GBest.pos = tmppos;
     end
     for j = 1:ng
@@ -98,14 +98,14 @@ for i=1:nPop
 end
 
 %% main loop
-cache_fit = zeors(maxIter*ng,1);
+cache_fit = zeros(maxIter*ng,1);
 for i = 1: maxIter
     for j =1 : ng
         for k = 1:nPop
             % update velocity
             group(j).par(k).velocity = w*group(j).par(k).velocity ...
-                +c1*rand(group(j).varsz)*(group(j).par(k).best.pos - group(j).par(k).pos) ...
-                +c2*rand(group(j).varsz)*(group(j).best.pos - group(j).par(k).pos);
+                +c1*rand(group(j).varsz).*(group(j).par(k).best.pos - group(j).par(k).pos) ...
+                +c2*rand(group(j).varsz).*(group(j).best.pos - group(j).par(k).pos);
             
             % aplay velocity limit
             group(j).par(k).velocity = max(group(j).par(k).velocity,group(j).vlb);
@@ -115,12 +115,12 @@ for i = 1: maxIter
             group(j).par(k).pos = group(j).par(k).pos + group(j).par(k).velocity;
             
             % velocity mirror effect
-            isout = (group(j).par(k).pos < group(j).lb |group(j).par(k).pos>group(j).ub);
+            isout = (group(j).par(k).pos < group(j).varlb |group(j).par(k).pos>group(j).varub);
             group(j).par(k).velocity(isout) = - group(j).par(k).velocity(isout);
             
             % aplay position limit
-            group(j).par(k).pos = min(group(j).par(k).pos,group(j).lb);
-            group(j).par(k).pos = max(group(j).par(k).pos,group(j).ub);
+            group(j).par(k).pos = max(group(j).par(k).pos,group(j).varlb);
+            group(j).par(k).pos = min(group(j).par(k).pos,group(j).varub);
             
             % compute cost
             tmpx = GBest.pos;
@@ -146,5 +146,6 @@ for i = 1: maxIter
         end
         cache_fit((i-1)*ng+j) = group(j).best.cost;
     end
+    w = w*wdamp;
 end
 
