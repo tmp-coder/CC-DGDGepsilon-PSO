@@ -4,7 +4,6 @@ persistent p;
 if isempty(p)
     D = max(size(x));
     p = randsample(D,D);
-    p(1:D/20)
 end
 z =zeros(size(x));
 for i = 1:size(x,1)
