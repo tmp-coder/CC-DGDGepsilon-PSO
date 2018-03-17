@@ -1,4 +1,4 @@
-function [best, cache_fit,best_epsi,ng,FEs,diff]= cc_gdg_pso(costf,nvar,LB,UB,max_FEs,accurate_ng)
+function [best, cache_fit,FEs,diff]= cc_gdg_pso(costf,nvar,LB,UB,maxFEs)
 % main function
 % args:
 %     costf: the function of evaluation
@@ -16,14 +16,30 @@ function [best, cache_fit,best_epsi,ng,FEs,diff]= cc_gdg_pso(costf,nvar,LB,UB,ma
 %     FEs:    actual fitness evaluations;
 %     diff:    diff matrix of variables
 
+
 [diff,FEs] = calc_diff(costf,nvar,LB,UB);
-[epsilong,eps_idx] = bin_search(diff,accurate_ng);
-
-best_epsi.value =epsilong;
-best_epsi.idx = eps_idx;
-
-[labels,~] = conncomp(diff>epsilong);
-groups = grouping(labels);
-ng = size(groups,1);
-[best,cache_fit,tmp_fe] = pso(groups,max_FEs,costf,LB,UB);
-FEs = FEs + tmp_fe;
+% load diff.mat;
+% FEs=0;
+epsilon = sort(diff(:));
+epsilon = unique(epsilon);
+maxInterval = 3;
+num = size(epsilon,1);
+k = ceil(num/maxInterval);
+now=num;
+cache_fit=[];
+%last_ng = 0;
+maxFEs = maxFEs-FEs;
+while maxFEs >0
+    now = max(1,now);
+    runIter = false;
+    [labels,ng] = conncomp(diff>epsilon(now));
+    groups = grouping(labels);
+    disp(['epsilong = ',num2str(epsilon(now)),' number of conmponents ',num2str(ng),' groups ',num2str(size(groups,1))]);
+    [tmpGB,tmpfit,tmpFE] = pso(groups,maxFEs,costf,LB,UB,runIter);
+    best =tmpGB;
+    disp(['Gbest = ',num2str(best.cost)]);
+    maxFEs = maxFEs-tmpFE;
+    FEs = FEs+tmpFE;
+    now = now-k;
+    cache_fit = [cache_fit;tmpfit];
+end
