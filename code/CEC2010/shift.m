@@ -5,6 +5,8 @@ persistent o; % shifted center,Prevent the value of rot matrix in the iteration 
 
 if isempty(o)
     sz = size(x);
-    o = normrnd(0,1,sz);
+    o = randi([-3,3]);% [-5,5]
+    disp('optimal x:');
+    o
 end
 vec = x - o;
